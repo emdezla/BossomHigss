@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """some personal helper functions for project 1."""
 import numpy as np
+<<<<<<< HEAD
 from implementations import*
 from proj1_helpers import*
+=======
+from implementations import *
+>>>>>>> 6d821103c13681dbfbc66399a15c41fb5b57e173
 
 
 def data_preprocessing(y, tx, ids, dataTreatment="none"):
@@ -74,13 +78,61 @@ def check_accuracy(y_predicted,y_true):
 
 ##################################################################################
 
-def prediction(x_train, y_train, x_test, degrees, lambda_):
+def prediction(x_train, y_train, x_test, degrees=1, method="RegLogReg", initial_w=None,
+               max_iters=10000, gamma=1e-1, lambda_=0):
+    """
+        Function that alows to train the model with a given method and corresponding parameters. 
+        It also predicts the label from a given test data. The arguments are:
+        
+        - x_train, y_train: Train data
+        - x_test: Test data
+        - degrees: 1. If an int: Max degree for the augmentation of each feature.
+                   2. If an array of size (# of feature): Each element of degrees represents the max degree
+                      for the augmentation of the corresponding feature.
+        - method: The method used to predict the label:
+                   1. LS: Least-squares
+                   2. LS_GD: Least-squares gradient descent
+                   3. LS_SGD: Least-squares stochastic gradient descent
+                   4. RR: Ridge regression
+                   5. LR: Logistic regression
+                   6. RLR: Regularized logistic regression
+        - initial_w: Starting points for the iterative methods (LS_GD, LS_SGD, LR, RLR)
+        - max_iters: Number of iterations for the iterative methods (LS_GD, LS_SGD, LR, RLR)
+        - gamma: Step size for the iterative methods (LS_GD, LS_SGD, LR, RLR)
+        - lambda_: Regularization term for RR and RLR.
+                   
+    """
+    
     N_te=x_test.shape[0]
     y_test_predicted=np.zeros(N_te)
     phi_train = build_poly(x_train, degrees)
     phi_test = build_poly(x_test, degrees)
+    D=phi_train.shape[1]
     
-    w, mse_tr = ridge_regression(y_train, phi_train, lambda_)
+    if ((initial_w==None) and (method!="LS") and (method!="RR")):
+        initial_w = np.zeros(D)
+    
+    if (method=="LS"):
+        w, loss_tr = least_squares(y_train, phi_train)
+        
+    elif (method=="LS_GD"):
+        w, loss_tr = least_squares_GD(y_train, phi_train, initial_w, max_iters, gamma)
+        
+    elif (method=="LS_SGD"):
+        w, loss_tr = least_squares_SGD(y_train, phi_train, initial_w, max_iters, gamma)
+        
+    elif (method=="RR"):
+        w, loss_tr = ridge_regression(y_train, phi_train, lambda_)
+        
+    elif (method=="LR"):
+        w, loss_tr = logistic_regression(y_train, phi_train, initial_w, max_iters, gamma)
+        
+    elif (method=="RLR"):
+        w, loss_tr = reg_logistic_regression(y_train, phi_train, lambda_, initial_w, max_iters, gamma)
+        
+    else:
+        raise Exception('The method is not valid!')
+    
     y_test_predicted = predict_labels(w, phi_test)
     y_train_predicted = predict_labels(w, phi_train)
     accuracy_train, f1_train=check_accuracy(y_train_predicted,y_train)
