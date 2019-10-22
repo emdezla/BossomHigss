@@ -52,7 +52,7 @@ def ridge_regression(y, tx, lambda_):
     
     return w, loss
 
-def logistic_regression(y, tx, initial_w, max_iter, gamma):
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
         Returns the weights that minimalize the negative log-likelihood function, 
         and the corresponding negative log-likelihood loss. This is done using a
@@ -75,7 +75,7 @@ def logistic_regression(y, tx, initial_w, max_iter, gamma):
             
     return w, loss
 
-def reg_logistic_regression(y, tx, lambda_, initial_w, max_iter, gamma):
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     """ 
         Performs a logistic regression with a regularization term. The loss is calculated without
         this term.
@@ -145,16 +145,12 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
             
 def compute_stoch_gradient(y, tx, w, batch_size=1):
     """Compute a stochastic gradient for mse from just few examples n and their corresponding y_n labels."""
-    d=tx.shape[1]
+    
     for element_y, element_x in batch_iter(y, tx, batch_size):
-        grad_element=np.zeros((d,batch_size))
-        for n in range(batch_size):
-            y_n=np.array([element_y[n]])
-            x_n=np.array([element_x[n,:]])
-            grad_n=compute_gradient(y_n, x_n, w)
-            grad_element[n]=grad_n
-        grad_batch=np.mean(grad_element,axis=1)
-    return grad_batch
+        
+        grad_n = compute_gradient(element_y,element_x,w)
+        
+    return grad_n
 
 ##########################################################################
 # Implemented in logistic regression.
