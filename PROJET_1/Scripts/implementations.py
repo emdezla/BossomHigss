@@ -84,7 +84,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     D=tx.shape[1]
     
     # start the logistic regression
-    for iter in range(max_iter):
+    for iter in range(max_iters):
         # get loss and update w.
  
         loss=calculate_log_loss(y, tx, w) #Loss without the regularizer.
