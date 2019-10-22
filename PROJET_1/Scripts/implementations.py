@@ -92,7 +92,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iter, gamma):
         w=w-gamma*grad
         
         # log info
-        if ((iter % 100 == 0) and display):
+        if ((iter % 1000 == 0) and display):
             print("Current iteration={i}, loss={l}".format(i=iter, l=loss))
             
     return w, loss

@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 """some personal helper functions for project 1."""
 import numpy as np
-<<<<<<< HEAD
-from implementations import*
-from proj1_helpers import*
-=======
 from implementations import *
->>>>>>> 6d821103c13681dbfbc66399a15c41fb5b57e173
+from proj1_helpers import *
 
 
 def data_preprocessing(y, tx, ids, dataTreatment="none"):
@@ -20,7 +16,7 @@ def data_preprocessing(y, tx, ids, dataTreatment="none"):
         meaningfull_ind=(tx!=-999).all(1)
         y = y[meaningfull_ind]
         tx = tx[meaningfull_ind]
-      #  ids = ids[meaningfull_ind]
+        ids = ids[meaningfull_ind]
     elif (dataTreatment=="zero"):
         tx[tx==-999]=0
     elif (dataTreatment=="mean"):
@@ -114,105 +110,41 @@ def prediction(x_train, y_train, x_test, degrees=1, method="RegLogReg", initial_
     
     if (method=="LS"):
         w, loss_tr = least_squares(y_train, phi_train)
+        y_test_predicted = predict_labels(w, phi_test)
+        y_train_predicted = predict_labels(w, phi_train)
         
     elif (method=="LS_GD"):
         w, loss_tr = least_squares_GD(y_train, phi_train, initial_w, max_iters, gamma)
+        y_test_predicted = predict_labels(w, phi_test)
+        y_train_predicted = predict_labels(w, phi_train)
         
     elif (method=="LS_SGD"):
         w, loss_tr = least_squares_SGD(y_train, phi_train, initial_w, max_iters, gamma)
+        y_test_predicted = predict_labels(w, phi_test)
+        y_train_predicted = predict_labels(w, phi_train)
         
     elif (method=="RR"):
         w, loss_tr = ridge_regression(y_train, phi_train, lambda_)
+        y_test_predicted = predict_labels(w, phi_test)
+        y_train_predicted = predict_labels(w, phi_train)
         
     elif (method=="LR"):
+        y_train[y_train==-1]=0
         w, loss_tr = logistic_regression(y_train, phi_train, initial_w, max_iters, gamma)
+        y_test_predicted = predict_labels(w, phi_test)
+        y_train_predicted = predict_labels(w, phi_train, reg_log=True)
         
     elif (method=="RLR"):
+        y_train[y_train==-1]=0
         w, loss_tr = reg_logistic_regression(y_train, phi_train, lambda_, initial_w, max_iters, gamma)
+        y_test_predicted = predict_labels(w, phi_test)
+        y_train_predicted = predict_labels(w, phi_train,reg_log=True)
         
     else:
         raise Exception('The method is not valid!')
     
-    y_test_predicted = predict_labels(w, phi_test)
-    y_train_predicted = predict_labels(w, phi_train)
     accuracy_train, f1_train=check_accuracy(y_train_predicted,y_train)
     
-    #print("The train data accuracy of the model is ",accuracy_train, "\nThe train data f1 score of the model is ", f1_train)
+    print("The train data accuracy of the model is ",accuracy_train, "\nThe train data f1 score of the model is ", f1_train)
     
     return y_train_predicted, y_test_predicted
-
-def build_k_indices(y, k_fold, seed):
-    """build k indices for k-fold cross-validation."""
-    num_row = y.shape[0]
-    interval = int(num_row / k_fold)
-    np.random.seed(seed)
-    indices = np.random.permutation(num_row)
-    k_indices = [indices[k * interval: (k + 1) * interval] for k in range(k_fold)]
-    return np.array(k_indices)
-
-def cross_validation(y, x, k_indices, k, lambda_, degrees):
-    """return the accuracy of ridge regression."""
-    y_test=y[k_indices[k,:]]
-    x_test=x[k_indices[k,:]]   
-    y_train=np.delete(y,k)
-    x_train=np.delete(x,k,0)
-    
-    y_pred_train, y_pred_test = prediction(x_train, y_train, x_test, degrees, lambda_)
-    accuracy_train, F1_train = check_accuracy(y_pred_train, y_train)
-    accuracy_test, F1_test = check_accuracy(y_pred_test, y_test)
-    return accuracy_train, accuracy_test, F1_train, F1_test
-
-def cross_validation_visualization(lambdas, acc_tr, acc_te, f1_tr, f1_te):
-    """visualization of the accuracy and the f1 score for the train data and the test data."""
-    fig = plt.figure()
-    fig.set_size_inches(12,4)
-    ax_acc = fig.add_subplot(1, 2, 1)
-    ax_f1 = fig.add_subplot(1, 2, 2)
-    
-    ax_acc.set_xlabel('lambda')
-    ax_acc.set_ylabel('accuracy')
-    ax_acc.semilogx(lambdas, acc_tr, marker=".", color='b', label='train accuracy')
-    ax_acc.semilogx(lambdas, acc_te, marker=".", color='r', label='test accuracy')
-    ax_acc.set_title('Accuracy')           
-    ax_acc.grid(True)
-    ax_acc.legend(loc=2)
-    
-    ax_f1.set_xlabel('lambda')
-    ax_f1.set_ylabel('f1 score')
-    ax_f1.semilogx(lambdas, f1_tr, marker=".", color='b', label='train f1 score')
-    ax_f1.semilogx(lambdas, f1_te, marker=".", color='r', label='test f1 score')
-    ax_f1.set_title('F1 score')           
-    ax_f1.grid(True)
-    ax_f1.legend(loc=2)
-    
-    fig.savefig('cross_validation')
-
-
-def cross_validation_demo(y, x, k_fold, lambdas, degrees,seed=1):
-    """to do"""
-    k_indices = build_k_indices(y, k_fold,seed)
-    acc_tr = []
-    acc_te = []
-    f1_tr = []
-    f1_te = []
-    for lambda_ in lambdas:
-        acc_tr_lambda=0;
-        acc_te_lambda=0;
-        f1_tr_lambda=0;
-        f1_te_lambda=0;
-        for k in range(k_fold):
-            accuracy_train, accuracy_test, f1_train, f1_test = cross_validation(y, x, k_indices, k, lambda_, degrees)
-            
-            acc_tr_lambda += accuracy_train/k_fold
-            acc_te_lambda += accuracy_test/k_fold
-            f1_tr_lambda += f1_train/k_fold
-            f1_te_lambda += f1_test/k_fold
-            
-        print("The train data accuracy of the model is ",acc_tr_lambda, " with degree=", degrees," and lambda=", lambda_)
-        
-        acc_tr.append(acc_tr_lambda)
-        acc_te.append(acc_te_lambda)
-        f1_tr.append(f1_tr_lambda)
-        f1_te.append(f1_te_lambda)
-       
-    cross_validation_visualization(lambdas, acc_tr, acc_te, f1_tr, f1_te)
