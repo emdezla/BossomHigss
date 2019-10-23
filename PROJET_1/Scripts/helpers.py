@@ -74,8 +74,8 @@ def check_accuracy(y_predicted,y_true):
 
 ##################################################################################
 
-def prediction(x_train, y_train, x_test, degrees=1, method="RegLogReg", initial_w=None,
-               max_iters=10000, gamma=1e-1, lambda_=0):
+def prediction(x_train, y_train, x_test, degrees=1,lambda_=0, method="RR", initial_w=None,
+               max_iters=10000, gamma=1e-1):
     """
         Function that alows to train the model with a given method and corresponding parameters. 
         It also predicts the label from a given test data. The arguments are:
