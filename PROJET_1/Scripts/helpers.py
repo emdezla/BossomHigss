@@ -145,6 +145,6 @@ def prediction(x_train, y_train, x_test, degrees=1, method="RegLogReg", initial_
     
     accuracy_train, f1_train=check_accuracy(y_train_predicted,y_train)
     
-    print("The train data accuracy of the model is ",accuracy_train, "\nThe train data f1 score of the model is ", f1_train)
+    print("Lambda=1e{0:1.0f}:\n The train data accuracy of the model is {1} \nThe train data f1 score of the model is {2} ".format(np.log10(lambda_),accuracy_train,f1_train))
     
     return y_train_predicted, y_test_predicted
