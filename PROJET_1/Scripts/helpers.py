@@ -4,36 +4,46 @@ import numpy as np
 from implementations import *
 from proj1_helpers import *
 
+def data_processing(DATA):
+                       
+    y, tx, ids = load_csv_data(DATA,sub_sample=False)
+    
+    for jet in range(4):
+        
+        # select data in function of its jet number and delete the corresponding feature
+        x_jet = tx[tx[:, 22] == jet]
+        y_jet = y[tx[:, 22] == jet]
+        ids_jet = ids[tx[:, 22] == jet]
 
-def data_preprocessing(y, tx, ids, dataTreatment="none"):
-    """ Treatment of the meaningless data (-999)
-            "none": nothing is done.
-            "zero": meaningless data are replaced with zeros.
-            "discard": meaningless data points are discarded.
-            "mean": Replaces meaningless data with the mean of the meaningful data points.
-    """
-    if (dataTreatment=="discard"):
-        meaningfull_ind=(tx!=-999).all(1)
-        y = y[meaningfull_ind]
-        tx = tx[meaningfull_ind]
-        ids = ids[meaningfull_ind]
-    elif (dataTreatment=="zero"):
-        tx[tx==-999]=0
-    elif (dataTreatment=="mean"):
-        TX = np.copy(tx)
+        x_jet = np.delete(x_jet, 22, 1)
+        
+        # replace the Nan values by the mean of the mass with same jet number
+        TX = np.copy(x_jet[:,0])
         TX[TX==-999]=0
-        S = np.sum(TX,axis=0)
-        TX[TX!=0]=1
-        N = np.sum(TX,axis=0)
-        means = S/N
+        mean = np.sum(TX)/len(TX)
+        TX[TX==0]=mean
+        x_jet[:,0] = TX
         
-        for index, mean in enumerate(means):
-            indy = np.where(tx[:,index]==-999)
-            tx[indy,index] = mean
-        
-    else:
-        print("Careful, some data points have meaningless features!")
-    return y, tx, ids
+    
+        # extract the meaningless features depending on the jet number
+        if jet==0: 
+            jet0_delete = [4,5,6,12,22,23,24,25,26,27,28] 
+            jet0 = np.delete(x_jet,jet0_delete,1)
+            print("tx_0_train:",jet0.shape)
+        elif jet==1:
+            jet1_delete = [4,5,6,12,25,26,27]
+            jet1 = np.delete(x_jet,jet1_delete,1)
+            print("tx_1_train:",jet1.shape)
+        elif jet==2:
+            jet2 = x_jet
+            print("tx_2_train:",jet2.shape)
+        elif jet==3:
+            jet3 = x_jet
+            print("tx_3_train:",jet3.shape)
+        else: print("Fatal error - unexpected jet number")
+            
+    return jet0,jet1,jet2,jet3
+
         
 ##################################################################################
 
@@ -148,3 +158,35 @@ def prediction(x_train, y_train, x_test, degrees=1,lambda_=0, method="RR", initi
     print("Lambda=1e{0:1.0f}:\n The train data accuracy of the model is {1} \nThe train data f1 score of the model is {2} ".format(np.log10(lambda_),accuracy_train,f1_train))
     
     return y_train_predicted, y_test_predicted
+
+
+
+"""def data_preprocessing(y, tx, ids, dataTreatment="none"):
+     Treatment of the meaningless data (-999)
+            "none": nothing is done.
+            "zero": meaningless data are replaced with zeros.
+            "discard": meaningless data points are discarded.
+            "mean": Replaces meaningless data with the mean of the meaningful data points.
+    
+    if (dataTreatment=="discard"):
+        meaningfull_ind=(tx!=-999).all(1)
+        y = y[meaningfull_ind]
+        tx = tx[meaningfull_ind]
+        ids = ids[meaningfull_ind]
+    elif (dataTreatment=="zero"):
+        tx[tx==-999]=0
+    elif (dataTreatment=="mean"):
+        TX = np.copy(tx)
+        TX[TX==-999]=0
+        S = np.sum(TX,axis=0)
+        TX[TX!=0]=1
+        N = np.sum(TX,axis=0)
+        means = S/N
+        
+        for index, mean in enumerate(means):
+            indy = np.where(tx[:,index]==-999)
+            tx[indy,index] = mean
+        
+    else:
+        print("Careful, some data points have meaningless features!")
+    return y, tx, ids"""
