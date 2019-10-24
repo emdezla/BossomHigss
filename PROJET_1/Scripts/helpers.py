@@ -4,17 +4,20 @@ import numpy as np
 from implementations import *
 from proj1_helpers import *
 
-def data_processing(DATA):
+def data_processing(DATA,sub_sample=False):
                        
-    y, tx, ids = load_csv_data(DATA,sub_sample=False)
+    y, tx, ids = load_csv_data(DATA,sub_sample)
     
+    y_jets = []
     for jet in range(4):
         
         # select data in function of its jet number and delete the corresponding feature
         x_jet = tx[tx[:, 22] == jet]
         y_jet = y[tx[:, 22] == jet]
         ids_jet = ids[tx[:, 22] == jet]
-
+        
+        y_jets.append(y_jet) # added to allow return of y_jet
+        
         x_jet = np.delete(x_jet, 22, 1)
         
         # replace the Nan values by the mean of the mass with same jet number
@@ -23,8 +26,8 @@ def data_processing(DATA):
         mean = np.sum(TX)/len(TX)
         TX[TX==0]=mean
         x_jet[:,0] = TX
-        
     
+        
         # extract the meaningless features depending on the jet number
         if jet==0: 
             jet0_delete = [4,5,6,12,22,23,24,25,26,27,28] 
@@ -41,8 +44,13 @@ def data_processing(DATA):
             jet3 = x_jet
             print("tx_3_train:",jet3.shape)
         else: print("Fatal error - unexpected jet number")
+    
+    y0 = y_jets[0][:]
+    y1 = y_jets[1][:]
+    y2 = y_jets[2][:]
+    y3 = y_jets[3][:]
             
-    return jet0,jet1,jet2,jet3
+    return y0,jet0,y1,jet1,y2,jet2,y3,jet3
 
         
 ##################################################################################
