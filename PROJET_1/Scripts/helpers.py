@@ -17,34 +17,32 @@ def data_processing(y,tx,ids, types="train"):
         ids_jet = ids[tx[:, 22] == jet]
         
         jet_ids.append(ids_jet)
-        y_jets.append(y_jet) # added to allow return of y_jet
+        y_jets.append(y_jet)
         
         x_jet = np.delete(x_jet, 22, 1)
         
         # replace the Nan values by the mean of the mass with same jet number
         TX = np.copy(x_jet[:,0])
-        indices = np.where(TX==-999)
-        TX[indices]=0
-        
-        mean = np.sum(TX)/len(indices)
-        TX[indices]=mean
+        TX[TX==-999]=0
+        mean = np.sum(TX)/len(TX)
+        TX[TX==0]=mean
         x_jet[:,0] = TX
         
         # extract the meaningless features depending on the jet number
         if jet==0: 
             jet0_delete = [4,5,6,12,22,23,24,25,26,27,28] 
             jet0 = np.delete(x_jet,jet0_delete,1)
-            print("tx_0_",types,": ",jet0.shape)
+            #print("tx_0_",types,": ",jet0.shape)
         elif jet==1:
             jet1_delete = [4,5,6,12,25,26,27]
             jet1 = np.delete(x_jet,jet1_delete,1)
-            print("tx_1_",types,": ",jet1.shape)
+            #print("tx_1_",types,": ",jet1.shape)
         elif jet==2:
             jet2 = x_jet
-            print("tx_2_",types,": ",jet2.shape)
+            #print("tx_2_",types,": ",jet2.shape)
         elif jet==3:
             jet3 = x_jet
-            print("tx_3_",types,": ",jet3.shape)
+            #print("tx_3_",types,": ",jet3.shape)
         else: print("Fatal error - unexpected jet number")
     
     x_jets = [jet0, jet1, jet2, jet3]
@@ -55,7 +53,7 @@ def data_processing(y,tx,ids, types="train"):
 ##################################################################################
 
 def build_poly(x, degrees, constant_feature=True):
-    """Polynomial basis functions for input data x. Each feature x_k is extended with x_k^j, j=1 up to j=degrees[k]. 
+    """Polynomial basis functions for input data x. Each feature x_k is extended with x_k^j, j=1 up t j=degrees[k]. 
        Adds a column of ones in the front of x if constant_feature = True"""
     N=x.shape[0]
     D=x.shape[1]

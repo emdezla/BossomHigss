@@ -4,11 +4,11 @@ import numpy as np
 from implementations import *
 from proj1_helpers import *
 
-def data_processing(DATA,sub_sample=False):
-                       
-    y, tx, ids = load_csv_data(DATA,sub_sample)
+def data_processing(y,tx,ids, types="train"):
     
+    jet_ids = []
     y_jets = []
+    
     for jet in range(4):
         
         # select data in function of its jet number and delete the corresponding feature
@@ -16,7 +16,8 @@ def data_processing(DATA,sub_sample=False):
         y_jet = y[tx[:, 22] == jet]
         ids_jet = ids[tx[:, 22] == jet]
         
-        y_jets.append(y_jet) # added to allow return of y_jet
+        jet_ids.append(ids_jet)
+        y_jets.append(y_jet)
         
         x_jet = np.delete(x_jet, 22, 1)
         
@@ -26,37 +27,33 @@ def data_processing(DATA,sub_sample=False):
         mean = np.sum(TX)/len(TX)
         TX[TX==0]=mean
         x_jet[:,0] = TX
-    
         
         # extract the meaningless features depending on the jet number
         if jet==0: 
             jet0_delete = [4,5,6,12,22,23,24,25,26,27,28] 
             jet0 = np.delete(x_jet,jet0_delete,1)
-            print("tx_0_train:",jet0.shape)
+            #print("tx_0_",types,": ",jet0.shape)
         elif jet==1:
             jet1_delete = [4,5,6,12,25,26,27]
             jet1 = np.delete(x_jet,jet1_delete,1)
-            print("tx_1_train:",jet1.shape)
+            #print("tx_1_",types,": ",jet1.shape)
         elif jet==2:
             jet2 = x_jet
-            print("tx_2_train:",jet2.shape)
+            #print("tx_2_",types,": ",jet2.shape)
         elif jet==3:
             jet3 = x_jet
-            print("tx_3_train:",jet3.shape)
+            #print("tx_3_",types,": ",jet3.shape)
         else: print("Fatal error - unexpected jet number")
     
-    y0 = y_jets[0][:]
-    y1 = y_jets[1][:]
-    y2 = y_jets[2][:]
-    y3 = y_jets[3][:]
+    x_jets = [jet0, jet1, jet2, jet3]
             
-    return y0,jet0,y1,jet1,y2,jet2,y3,jet3
+    return y_jets, x_jets, jet_ids
 
         
 ##################################################################################
 
 def build_poly(x, degrees, constant_feature=True):
-    """Polynomial basis functions for input data x. Each feature x_k is extended with x_k^j, j=1 up to j=degrees[k]. 
+    """Polynomial basis functions for input data x. Each feature x_k is extended with x_k^j, j=1 up t j=degrees[k]. 
        Adds a column of ones in the front of x if constant_feature = True"""
     N=x.shape[0]
     D=x.shape[1]
@@ -163,7 +160,7 @@ def prediction(x_train, y_train, x_test, degrees=1,lambda_=0, method="RR", initi
     
     accuracy_train, f1_train=check_accuracy(y_train_predicted,y_train)
     
-    print("Lambda=1e{0:1.0f}:\n The train data accuracy of the model is {1} \nThe train data f1 score of the model is {2} ".format(np.log10(lambda_),accuracy_train,f1_train))
+    print("Lambda=1e{0:1.3f}:\n The train data accuracy of the model is {1} \nThe train data f1 score of the model is {2} ".format(np.log10(lambda_),accuracy_train,f1_train))
     
     return y_train_predicted, y_test_predicted
 
